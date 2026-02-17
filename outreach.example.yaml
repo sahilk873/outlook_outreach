@@ -1,0 +1,41 @@
+# Outreach config – copy to outreach.yaml (or any name) and edit.
+# Run: python main.py --config outreach.yaml
+
+# How to find startups: use one of these (list_file takes precedence if set).
+criteria: "Innovative medicine startups, novel neurotechnology companies, cutting-edge biotech startups, breakthrough drug diagnostics companies, novel medical technology startups, innovative biotech companies, 1-10 employees (a size of company that is likely to respond to a cold email), outside the US)"
+# list_file: null   # or path, e.g. startups.txt
+
+# Email content
+purpose: "Unpaid Summer research or internship collaboration (AI/ML in healthcare)"
+subject: ""
+tone: "professional, warm, mission-driven, human-sounding text, not robot sounding"
+notes: >
+  For the subject line, it should include Unpaid Summer Internship and something about what the company does.
+  My name is Sahil Kapadia.
+  Morehead-Cain Scholar, America's first merit scholarship, with fully funded summer support.
+  Background in Computer Science and Neuroscience at the University of North Carolina at Chapel Hill and researcher at MIT.
+  Make the email personalized to the company and the person, don't use a generic template.
+  Make the email not too long but also detailed, don't use a lot of words.
+  Make it seem like you're a real person and not a robot and express genuine enthusiasm for what the company does and the opportunity.
+  Make it seem like you're interested in the company and its mission and it should seem like we did research on the company.
+  Make the brief part about my experiences customize so it seemed perfectly aligned with what the company is doing.
+  I have experience in ML for drug repurposing, clinical AI validation, omics analysis, foundatinoal model development,
+  and a range of ML architectures (LSTMs, contrastive learning, graph methods, ensemble models), but don't just repeat my experiences verbatim, connect what's relevant in my experiences (or make up experiences that are relevant to the company) and use that to tailor the email to the company.
+  Strong interest in cutting-edge research,rigorous evaluation, model interpretability, and clinically deployable AI.
+  Open to in-person work (international travel fully funded) or remote collaboration.
+  Compensation not required.
+  Emphasize desire to contribute meaningfully to technically challenging, real-world problems.
+  Close by noting that my resume is attached for context and inviting them to let me know if any additional information would be helpful.
+  Use this signature line: Sahil Kapadia
+  Morehead-Cain Scholar | Honors Carolina
+  Class of 2028 | University of North Carolina at Chapel Hill
+  Email: kapadia.sahil@gmail.com
+  Phone: 703-946-9027
+
+# Limits and behavior
+max_startups: 20   # adjust depending on outreach batch size
+no_confirm: true  # set to true only if you want to auto-send without review
+
+# Attachments (paths relative to project root or absolute)
+attach:
+  - Kapadia_Sahil_Resume.pdf

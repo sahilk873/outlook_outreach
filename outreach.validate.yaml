@@ -1,0 +1,24 @@
+# Minimal config to validate the pipeline end-to-end (smallest possible run).
+# Use with: python main.py -c outreach.validate.yaml
+# First run opens a browser for Outlook login; session is saved for next time.
+
+criteria: "agriculture startups"
+# list_file: null
+
+# Email content
+purpose: "Unpaid Summer research or internship collaboration (AI/ML in healthcare)"
+subject: ""
+tone: "professional, warm, mission-driven, human-sounding text, not robot sounding"
+notes: >
+  For the subject line, include Unpaid Summer Internship and something about the company.
+  My name is Sahil Kapadia.
+  Morehead-Cain Scholar | Honors Carolina
+  Class of 2028 | University of North Carolina at Chapel Hill
+  Email: kapadia.sahil@gmail.com
+  Phone: 703-946-9027
+
+max_startups: 2
+no_confirm: false
+
+attach:
+  - Kapadia_Sahil_Resume.pdf

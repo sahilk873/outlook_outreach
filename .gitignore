@@ -1,0 +1,21 @@
+# Secrets and credentials
+.env
+*.json
+!package.json
+
+# Playwright session (contains auth cookies)
+outlook_session.json
+
+# Virtual environment
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
