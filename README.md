@@ -6,8 +6,8 @@ This project mirrors the Gmail-based [gmail-automation](../gmail-automation) pip
 
 ## Flow
 
-1. **Discovery** – Describe criteria (e.g. “Seed-stage B2B SaaS in fintech”) or provide a list. The discovery agent uses web search to produce a structured list of startups (name, domain, one-liner).
-2. **Per company** – For each startup: email-finder finds contact email, writer drafts personalized subject + body.
+1. **Discovery** – Describe criteria (e.g. “Seed-stage B2B SaaS in fintech”) and the discovery agent uses web search to produce a structured list of startups (name, domain, one-liner). If you set `list_file` to a path (one company per line; format `Name | domain.com | one-liner` with optional 4th column `email`), discovery is skipped and that list is used as-is. When the optional email column is provided, email-finding is skipped for that row.
+2. **Per company** – For each startup: use pre-filled email from the list (if any), otherwise run email-finder to find contact email; then writer drafts personalized subject + body.
 3. **Review & send** – By default you are prompted “Send this email? [y/N]” after each draft. Sending is done via **Playwright**: it opens Outlook Web, fills To/Subject/Body, attaches files, and clicks Send.
 
 ## Setup
@@ -61,7 +61,7 @@ python main.py -c outreach.yaml
 # Discover startups, draft emails, confirm before send
 python main.py --criteria "Y Combinator W25 fintech startups" --purpose "partnership intro"
 
-# Use a file as criteria
+# Use a company list file (skips discovery; one per line: Name | domain.com | one-liner, optional 4th: email)
 python main.py --list-file startups.txt --purpose "sales intro" --tone friendly
 
 # Limit to 3 startups, send without confirmation

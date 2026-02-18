@@ -13,6 +13,7 @@ from outreach_agents.discovery_agent import discovery_agent
 from outreach_agents.email_finder_agent import email_finder_agent
 from outreach_agents.models import DiscoveryOutput, EmailDraft, StartupItem
 from outreach_agents.writer_agent import writer_agent
+from outlook.email_util import normalize_email
 from outlook.send import (
     close_outlook_send_session,
     ensure_outlook_session,
@@ -74,6 +75,74 @@ class OutreachResult:
     skipped_already_emailed: list[str] = field(default_factory=list)
 
 
+def _parse_email_from_field(text: str) -> str | None:
+    """Extract a single email from a string (e.g. list-file column); return None if none found."""
+    if not text or not text.strip():
+        return None
+    m = EMAIL_PATTERN.search(text.strip())
+    if m:
+        return normalize_email(m.group(0))
+    return None
+
+
+def load_startups_from_list_file(path: Path) -> list[StartupItem]:
+    """
+    Parse a list file into StartupItems (one company per line).
+    Format: "Name | domain.com | one-liner" or "Name | domain.com | one-liner | email".
+    Optional 4th column: contact email; when present and valid, email-finding is skipped for that row.
+    Deduplicates by normalized domain if present, else by normalized name. Empty file returns [].
+    Raises FileNotFoundError if path does not exist.
+    """
+    path = path.expanduser().resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"list_file not found: {path}")
+    seen_domain: set[str] = set()
+    seen_name: set[str] = set()
+    result: list[StartupItem] = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) >= 3:
+                name, domain, one_liner = parts[0], parts[1], parts[2][:120]
+            elif len(parts) == 2:
+                name, domain, one_liner = parts[0], parts[1], ""
+            else:
+                token = parts[0]
+                if "." in token and " " not in token:
+                    name = domain = token
+                    one_liner = ""
+                else:
+                    name, domain, one_liner = token, "", ""
+            parsed_email: str | None = None
+            if len(parts) >= 4 and parts[3]:
+                parsed_email = _parse_email_from_field(parts[3])
+            domain_n = _normalize_domain(domain)
+            name_n = (name or "").strip().lower()
+            key = domain_n if domain_n else name_n
+            if not key:
+                continue
+            if domain_n and domain_n in seen_domain:
+                continue
+            if not domain_n and name_n in seen_name:
+                continue
+            if domain_n:
+                seen_domain.add(domain_n)
+            else:
+                seen_name.add(name_n)
+            result.append(
+                StartupItem(
+                    name=name or key,
+                    domain=domain,
+                    one_liner=one_liner,
+                    email=parsed_email,
+                )
+            )
+    return result
+
+
 async def _discover_startups(criteria: str) -> list[StartupItem]:
     """Run discovery agent once and return structured list of startups (unique by domain)."""
     result = await Runner.run(discovery_agent, criteria)
@@ -95,7 +164,7 @@ def _parse_email_from_finder_output(text: str) -> str | None:
     for part in text.replace(",", " ").split():
         m = EMAIL_PATTERN.search(part)
         if m:
-            return m.group(0)
+            return normalize_email(m.group(0))
     return None
 
 
@@ -159,12 +228,13 @@ class OutreachManager:
         max_startups: int | None = None,
         attachments: list[str] | None = None,
         confirm_callback: Callable[[DraftWithMeta], bool] | None = None,
+        startups: list[StartupItem] | None = None,
     ) -> OutreachResult:
         """
-        Run the full pipeline: discover startups, then for each company find email -> draft -> send.
+        Run the full pipeline: discover startups (or use provided list), then for each company find email -> draft -> send.
 
-        Sends via Outlook Web (Playwright) instead of Gmail API. First run opens a browser for login;
-        session is saved for subsequent runs.
+        When startups is provided, discovery is skipped and that list is used as-is. Otherwise criteria is passed
+        to the discovery agent. Sends via Outlook Web (Playwright); first run opens a browser for login.
         """
         self.attachments = list(attachments) if attachments else []
         self.result.attachments = self.attachments
@@ -183,7 +253,10 @@ class OutreachManager:
 
         while True:
             emailed = _load_emailed_companies(EMAILED_COMPANIES_PATH)
-            raw_list = await _discover_startups(criteria)
+            if startups is not None:
+                raw_list = startups
+            else:
+                raw_list = await _discover_startups(criteria)
             to_process: list[StartupItem] = []
             for startup in raw_list:
                 if _normalize_domain(startup.domain) in emailed:
@@ -207,7 +280,10 @@ class OutreachManager:
             send_session = None
             try:
                 for startup in batch:
-                    email = await _find_email(startup)
+                    if startup.email and startup.email.strip():
+                        email = normalize_email(startup.email)
+                    else:
+                        email = await _find_email(startup)
                     if not email:
                         self.result.skipped_no_email.append(startup.name)
                         continue

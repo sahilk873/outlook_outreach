@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class StartupItem(BaseModel):
-    """A single startup from discovery."""
+    """A single startup from discovery or list file."""
 
     name: str = Field(description="Company or startup name")
     domain: str = Field(description="Primary domain, e.g. example.com")
@@ -11,6 +11,10 @@ class StartupItem(BaseModel):
         default="",
         max_length=120,
         description="Short description or tagline (one sentence, max 120 chars)",
+    )
+    email: str | None = Field(
+        default=None,
+        description="Optional contact email; when set (e.g. from list file), email-finding is skipped",
     )
 
 

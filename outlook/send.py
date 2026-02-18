@@ -5,6 +5,8 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright, Page, TimeoutError as PlaywrightTimeout
 
+from outlook.email_util import normalize_email
+
 
 @dataclass
 class OutlookSendSession:
@@ -125,6 +127,8 @@ async def _fill_and_send(
     """Fill compose form and send. Assumes compose pane/window is already open."""
     await page.wait_for_timeout(2500)
 
+    to_email = normalize_email(to_email)
+
     to_input = await _find_to_locator(page)
     if to_input is None:
         raise RuntimeError(
@@ -211,7 +215,7 @@ async def _fill_and_send(
                                 chooser = await fc_info.value
                                 await chooser.set_files(str(p))
                                 attached = True
-                                await page.wait_for_timeout(1000)
+                                await page.wait_for_timeout(2000)  # allow Outlook to process attachment
                                 break
                             except PlaywrightTimeout:
                                 continue
@@ -226,7 +230,7 @@ async def _fill_and_send(
                                     chooser = await fc_info.value
                                     await chooser.set_files(str(p))
                                     attached = True
-                                    await page.wait_for_timeout(1000)
+                                    await page.wait_for_timeout(2000)  # allow Outlook to process attachment
                                     break
                                 except (PlaywrightTimeout, Exception):
                                     continue

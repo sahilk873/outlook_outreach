@@ -2,8 +2,8 @@
 # Run: python main.py --config outreach.yaml
 
 # How to find startups: use one of these (list_file takes precedence if set).
-criteria: "Non-US, very early-stage (≈1–10 employees) research-driven life sciences or medical startups applying novel technical approaches (advanced ML/AI, computational biology, synthetic biology, bioelectronics, molecular sensing, robotics, or new experimental modalities). Prefer university spinouts or pre-seed/seed teams with publications, patents, or technical founders. Exclude generic digital health apps, telehealth platforms, clinics, agencies, and consulting companies."
-# list_file: null   # or path, e.g. startups.txt
+# criteria: "..."   # used only when list_file is not set
+list_file: startups.txt
 
 # Email content
 purpose: "Unpaid Summer research or internship collaboration (AI/ML in healthcare)"

@@ -9,7 +9,7 @@ _root = Path(__file__).resolve().parent
 if str(_root) not in sys.path:
     sys.path.insert(0, str(_root))
 
-from manager import DraftWithMeta, OutreachManager, OutreachResult
+from manager import DraftWithMeta, OutreachManager, OutreachResult, load_startups_from_list_file
 
 # Keys that can be set in a config file (same names as CLI, but with underscores)
 _CONFIG_KEYS = (
@@ -94,14 +94,21 @@ async def main_async(args: argparse.Namespace) -> None:
     )
 
     if args.list_file:
-        with open(args.list_file) as f:
-            criteria = f.read().strip()
-        if not criteria:
-            criteria = "Startups listed in the attached context (use the list below)."
+        list_path = Path(args.list_file)
+        if not list_path.is_absolute():
+            list_path = Path.cwd() / list_path
+        try:
+            startups_from_file = load_startups_from_list_file(list_path)
+        except FileNotFoundError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        criteria = ""
+        startups = startups_from_file
     else:
         criteria = args.criteria or ""
+        startups = None
 
-    if not criteria:
+    if not criteria and not startups:
         print("Provide --criteria or --list-file.", file=sys.stderr)
         sys.exit(1)
 
@@ -128,6 +135,7 @@ async def main_async(args: argparse.Namespace) -> None:
         max_startups=args.max_startups,
         attachments=attachments,
         confirm_callback=confirm_callback if manager.confirm_before_send else None,
+        startups=startups,
     )
 
     _print_result(result)

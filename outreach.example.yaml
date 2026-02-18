@@ -3,7 +3,7 @@
 
 # How to find startups: use one of these (list_file takes precedence if set).
 criteria: "Innovative medicine startups, novel neurotechnology companies, cutting-edge biotech startups, breakthrough drug diagnostics companies, novel medical technology startups, innovative biotech companies, 1-10 employees (a size of company that is likely to respond to a cold email), outside the US)"
-# list_file: null   # or path, e.g. startups.txt
+# list_file: startups.txt   # Path to file with one company per line. Optional format: "Name | domain.com | one-liner". Discovery is skipped; only email finding and drafting run. Path is relative to cwd unless absolute.
 
 # Email content
 purpose: "Unpaid Summer research or internship collaboration (AI/ML in healthcare)"
